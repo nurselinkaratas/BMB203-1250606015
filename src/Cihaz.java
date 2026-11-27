@@ -1,5 +1,6 @@
 public abstract class Cihaz {
     private static int sayac = 0;
+    protected static final double BIRIM_FIYAT = 45.0;
 
     private final int id;
     private String seriNo;
