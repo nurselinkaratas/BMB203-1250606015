@@ -84,4 +84,11 @@ public class TeknikServis {
         kayit.teslimEt(ucret);
         return ucret;
     }
+        public double toplamServisUcreti() {
+        double toplam = 0;
+        for (ServisKaydi kayit : kayitlar) {
+            toplam += kayit.getServisUcreti();
+        }
+        return toplam;
+    }
 }
