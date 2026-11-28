@@ -70,4 +70,18 @@ public class TeknikServis {
 
         kayitlar.add(new ServisKaydi(cihaz, tahminiSaat));
     }
+        public double OnarimTamamla(int cihazId) throws CihazTeslimEdildiException {
+        ServisKaydi kayit = kayitBul(cihazId);
+        if (kayit == null)
+            throw new IllegalArgumentException("Serviste böyle bir cihaz yok. Cihaz id: " + cihazId);
+        if (kayit.isTeslimEdildi())
+            throw new CihazTeslimEdildiException(
+                    "Teslim edilmiş cihaza yeni işlem eklenemez. Cihaz id: " + cihazId,
+                    cihazId);
+
+        double hamUcret = kayit.getCihaz().Hesapla(kayit.getTahminiSaat());
+        double ucret = indirimPolitikasi.Uygula(hamUcret);
+        kayit.teslimEt(ucret);
+        return ucret;
+    }
 }
