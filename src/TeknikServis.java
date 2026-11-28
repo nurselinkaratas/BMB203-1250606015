@@ -5,6 +5,7 @@ public class TeknikServis {
     private final int kapasite;
     private final List<ServisKaydi> kayitlar = new ArrayList<>();
     private IIndirimPolitikasi indirimPolitikasi;
+        private static final int ONAY_ESIGI_SAAT = 5;
 
     public TeknikServis(int kapasite, IIndirimPolitikasi indirimPolitikasi) {
         if (kapasite <= 0)
@@ -35,5 +36,38 @@ public class TeknikServis {
 
     public List<ServisKaydi> kayitlariListele() {
         return List.copyOf(kayitlar);
+    }
+        private ServisKaydi kayitBul(int cihazId) {
+        for (ServisKaydi kayit : kayitlar) {
+            if (kayit.getCihaz().getId() == cihazId) {
+                return kayit;
+            }
+        }
+        return null;
+    }
+
+    public void CihazKabul(Cihaz cihaz, int tahminiSaat, boolean musteriOnayi)
+            throws CihazTeslimEdildiException, OnayGerekliException {
+        if (cihaz == null)
+            throw new IllegalArgumentException("Cihaz boş olamaz");
+
+        ServisKaydi mevcut = kayitBul(cihaz.getId());
+        if (mevcut != null && mevcut.isTeslimEdildi())
+            throw new CihazTeslimEdildiException(
+                    "Teslim edilmiş cihaza yeni işlem eklenemez. Cihaz id: " + cihaz.getId(),
+                    cihaz.getId());
+        if (mevcut != null)
+            throw new IllegalStateException("Cihaz zaten serviste. Cihaz id: " + cihaz.getId());
+
+        if (bekleyenSayisi() >= kapasite)
+            throw new IllegalStateException("Servis kapasitesi dolu: " + kapasite);
+
+        if (tahminiSaat > ONAY_ESIGI_SAAT && !musteriOnayi)
+            throw new OnayGerekliException(
+                    "Tahmini süre " + ONAY_ESIGI_SAAT + " saati aşıyor, müşteri onayı gerekli: "
+                            + tahminiSaat + " saat",
+                    tahminiSaat);
+
+        kayitlar.add(new ServisKaydi(cihaz, tahminiSaat));
     }
 }
